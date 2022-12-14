@@ -5,12 +5,12 @@ import lombok.Getter;
 
 @Getter
 public class BoardUpdateResponseDto {
-    private Board board;
+    private BoardResponseDto responseDto;
     private boolean success;
     private String message;
 
     public BoardUpdateResponseDto(Board board, boolean success, String message) {
-        this.board = board;
+        this.responseDto = new BoardResponseDto(board);
         this.success = success;
         this.message = message;
     }

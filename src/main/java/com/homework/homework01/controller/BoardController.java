@@ -12,30 +12,31 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class BoardController {
     private final BoardService boardService;
-    @GetMapping("/api/board")
+    @GetMapping("/board")
     public List<Board> getBoards(){
         return boardService.getBoards();
     }
 
-    @GetMapping("/api/board/{id}")
+    @GetMapping("/board/{id}")
     public Board getBoard(@PathVariable Long id){
         return boardService.getBoard(id);
     }
 
-    @PostMapping("/api/board")
+    @PostMapping("/board")
     public Board createBoard(@RequestBody BoardRequestDto requestDto){
         return boardService.createBoard(requestDto);
     }
 
-    @PutMapping("/api/board/{id}")
+    @PutMapping("/board/{id}")
     public BoardUpdateResponseDto updateBoard(@PathVariable Long id, @RequestBody BoardRequestDto requestDto){
         return boardService.updateBoard(id, requestDto);
     }
 
-    @DeleteMapping("/api/board/{id}")
+    @DeleteMapping("/board/{id}")
     public BoardDeleteResponseDto deleteBoard(@PathVariable Long id, @RequestBody Map<String, String> password){
         return boardService.deleteBoard(id, password);
     }
