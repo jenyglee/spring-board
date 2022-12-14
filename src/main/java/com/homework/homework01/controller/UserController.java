@@ -5,6 +5,7 @@ import com.homework.homework01.dto.SignupRequestDto;
 import com.homework.homework01.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.stereotype.Controller;
@@ -19,7 +20,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/signup")
-    public void signup(@RequestBody SignupRequestDto signupRequestDto){
+    public void signup(@RequestBody @Valid SignupRequestDto signupRequestDto){
         userService.signup(signupRequestDto);
     }
 

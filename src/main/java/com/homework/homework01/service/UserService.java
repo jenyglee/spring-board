@@ -25,9 +25,6 @@ public class UserService {
     //✨성공했다는 메시지, 상태코드 반환하기
     @Transactional
     public void signup(SignupRequestDto signupRequestDto) {
-        //4~10자 사이인지
-        //소문자인지
-        //숫자인
         //username 중복확인
         String username = signupRequestDto.getUsername();
         System.out.println("username : " + username);

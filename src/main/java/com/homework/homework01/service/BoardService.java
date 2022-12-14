@@ -1,10 +1,13 @@
 package com.homework.homework01.service;
 
-import com.homework.homework01.dto.BoardDeleteResponseDto;
-import com.homework.homework01.dto.BoardRequestDto;
-import com.homework.homework01.dto.BoardUpdateResponseDto;
+import com.homework.homework01.dto.*;
 import com.homework.homework01.entity.Board;
+import com.homework.homework01.entity.User;
+import com.homework.homework01.jwtUtil.JwtUtil;
 import com.homework.homework01.repository.BoardRepository;
+import com.homework.homework01.repository.UserRepository;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,48 +18,93 @@ import java.util.*;
 @RequiredArgsConstructor
 public class BoardService {
     private final BoardRepository boardRepository;
+    private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
     @Transactional(readOnly = true)
-    public List<Board> getBoards() {
-        return boardRepository.findAllByOrderByCreatedAtDesc();
+    public List<BoardResponseDto> getBoards(HttpServletRequest request) {
+        // String token = jwtUtil.resolveToken(request);
+        // Claims claims;
+        List<BoardResponseDto> list = new ArrayList<>();
+        // if(token != null){
+        //     if(jwtUtil.validateToken(token)){
+        //         claims = jwtUtil.getUserInfoFromToken(token);
+        //     }else{
+        //         throw new IllegalArgumentException("Token Error");
+        //     }
+        //     List<Board> boards = boardRepository.findByUsername();
+        //     for (Board board : boards){
+        //         list.add(new BoardResponseDto(board));
+        //     }
+        //     return list;
+        // }
+        List<Board> boards = boardRepository.findAllByOrderByCreatedAtDesc();
+        for (Board board : boards){
+            list.add(new BoardResponseDto(board));
+        }
+        return list;
+
     }
 
-    public Board createBoard(BoardRequestDto requestDto) {
-        Board board = new Board(requestDto);
-        boardRepository.save(board);
-        return board;
+    public BoardResponseDto createBoard(BoardRequestDto requestDto, HttpServletRequest request) {
+        String token = jwtUtil.resolveToken(request);
+        Claims claims;
+        if(token != null){
+            if(jwtUtil.validateToken(token)){
+                claims = jwtUtil.getUserInfoFromToken(token);
+            }else{
+                throw new IllegalArgumentException("Token Error");
+            }
+
+            String subject = claims.getSubject();
+            System.out.println("subject : "+ subject);
+            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
+                    ()-> new IllegalArgumentException("사용자가 존재하지 않습니다.")
+            );
+            Board board = boardRepository.saveAndFlush(new Board(requestDto, user.getUsername()));
+            return new BoardResponseDto(board);
+        }
+        return null;
     }
 
     @Transactional
-    public BoardUpdateResponseDto updateBoard(Long id, BoardRequestDto requestDto) {
-        Optional<Board> board = boardRepository.findById(id);
-        if(board.isEmpty()){
-            return new BoardUpdateResponseDto(false, "없는 게시물입니다.");
+    public BoardResponseDto updateBoard(Long id, BoardRequestDto requestDto, HttpServletRequest request) {
+        String token = jwtUtil.resolveToken(request);
+        Board board = boardRepository.findById(id).orElseThrow(
+                ()-> new IllegalArgumentException("없는 게시물입니다.")
+        );
+        board.validationPassword(requestDto.getPassword());
+        if(token != null){
+            if(jwtUtil.validateToken(token)){
+                board.update(requestDto);
+                return new BoardResponseDto(board);
+            }else {
+                throw new IllegalArgumentException("Token Error");
+            }
         }
 
-        if (board.get().validationPassword(requestDto.getPassword())) {
-            board.get().update(requestDto);
-            return new BoardUpdateResponseDto(board.get(), true, "수정되었습니다.");
-        }
-        return new BoardUpdateResponseDto(false, "비밀번호가 틀렸습니다.");
+        return null;
     }
 
-    public BoardDeleteResponseDto deleteBoard(Long id, Map<String, String> password) {
-        Optional<Board> board = boardRepository.findById(id);
-        if(board.isEmpty()){
-            return new BoardDeleteResponseDto(false, "없는 게시물입니다.");
+    public void deleteBoard(Long id, BoardDeleteRequestDto requestDto, HttpServletRequest request) {
+        String token = jwtUtil.resolveToken(request);
+        Board board = boardRepository.findById(id).orElseThrow(
+                ()-> new IllegalArgumentException("없는 게시물입니다.")
+        );
+        board.validationPassword(requestDto.getPassword());
+        if(token != null){
+            if(jwtUtil.validateToken(token)){
+                boardRepository.deleteById(id);
+            }else{
+                throw new IllegalArgumentException("Token Error");
+            }
         }
-        if(board.get().validationPassword(password.get("password"))){
-            boardRepository.deleteById(id);
-            return new BoardDeleteResponseDto(true, "삭제되었습니다.");
-        }
-        return new BoardDeleteResponseDto(false, "비밀번호가 틀렸습니다.");
     }
 
-    public Board getBoard(Long id) {
-        Optional<Board> board = boardRepository.findById(id);
-        if(board.isEmpty()){
-            return null;
-        }
-        return board.get();
+    public BoardResponseDto getBoard(Long id) {
+        Board board = boardRepository.findById(id).orElseThrow(
+                ()-> new IllegalArgumentException("없는 게시물입니다.")
+        );
+
+        return new BoardResponseDto(board);
     }
 }

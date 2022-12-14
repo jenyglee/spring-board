@@ -1,10 +1,9 @@
 package com.homework.homework01.controller;
 
-import com.homework.homework01.dto.BoardDeleteResponseDto;
-import com.homework.homework01.dto.BoardRequestDto;
-import com.homework.homework01.dto.BoardUpdateResponseDto;
+import com.homework.homework01.dto.*;
 import com.homework.homework01.entity.Board;
 import com.homework.homework01.service.BoardService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,27 +16,27 @@ import java.util.Map;
 public class BoardController {
     private final BoardService boardService;
     @GetMapping("/board")
-    public List<Board> getBoards(){
-        return boardService.getBoards();
+    public List<BoardResponseDto> getBoards(HttpServletRequest request){
+        return boardService.getBoards(request);
     }
 
     @GetMapping("/board/{id}")
-    public Board getBoard(@PathVariable Long id){
+    public BoardResponseDto getBoard(@PathVariable Long id){
         return boardService.getBoard(id);
     }
 
     @PostMapping("/board")
-    public Board createBoard(@RequestBody BoardRequestDto requestDto){
-        return boardService.createBoard(requestDto);
+    public BoardResponseDto createBoard(@RequestBody BoardRequestDto requestDto, HttpServletRequest request){
+        return boardService.createBoard(requestDto, request);
     }
 
     @PutMapping("/board/{id}")
-    public BoardUpdateResponseDto updateBoard(@PathVariable Long id, @RequestBody BoardRequestDto requestDto){
-        return boardService.updateBoard(id, requestDto);
+    public BoardResponseDto updateBoard(@PathVariable Long id, @RequestBody BoardRequestDto requestDto, HttpServletRequest request){
+        return boardService.updateBoard(id, requestDto, request);
     }
 
     @DeleteMapping("/board/{id}")
-    public BoardDeleteResponseDto deleteBoard(@PathVariable Long id, @RequestBody Map<String, String> password){
-        return boardService.deleteBoard(id, password);
+    public void deleteBoard(@PathVariable Long id, @RequestBody BoardDeleteRequestDto requestDto, HttpServletRequest request){
+        boardService.deleteBoard(id, requestDto, request);
     }
 }

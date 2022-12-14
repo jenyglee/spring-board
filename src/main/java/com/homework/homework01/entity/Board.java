@@ -17,7 +17,7 @@ public class Board extends Timestamp{
     private String title;
 
     @Column(nullable = false)
-    private String name;
+    private String username;
 
     @Column(nullable = false)
     private String content;
@@ -25,21 +25,25 @@ public class Board extends Timestamp{
     @Column(nullable = false)
     private String password;
 
-    public Board(BoardRequestDto requestDto) {
+
+
+    public Board(BoardRequestDto requestDto, String username) {
         this.title = requestDto.getTitle();
-        this.name = requestDto.getName();
         this.content = requestDto.getContent();
         this.password = requestDto.getPassword();
+        this.username = username;
     }
 
     public void update(BoardRequestDto requestDto){
         this.title = requestDto.getTitle();
-        this.name = requestDto.getName();
         this.content = requestDto.getContent();
     }
 
-    public boolean validationPassword(String password){
-        return this.getPassword().equals(password);
+    public void validationPassword(String password){
+        if(!this.getPassword().equals(password)){
+            throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
+        }
+
     }
 
 }
