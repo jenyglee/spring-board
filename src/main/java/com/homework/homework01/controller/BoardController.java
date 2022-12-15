@@ -16,8 +16,8 @@ import java.util.Map;
 public class BoardController {
     private final BoardService boardService;
     @GetMapping("/board")
-    public List<BoardResponseDto> getBoards(HttpServletRequest request){
-        return boardService.getBoards(request);
+    public List<BoardResponseDto> getBoards(){
+        return boardService.getBoards();
     }
 
     @GetMapping("/board/{id}")

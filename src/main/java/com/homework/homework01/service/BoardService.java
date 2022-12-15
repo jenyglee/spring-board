@@ -21,7 +21,7 @@ public class BoardService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     @Transactional(readOnly = true)
-    public List<BoardResponseDto> getBoards(HttpServletRequest request) {
+    public List<BoardResponseDto> getBoards() {
         // String token = jwtUtil.resolveToken(request);
         // Claims claims;
         List<BoardResponseDto> list = new ArrayList<>();
