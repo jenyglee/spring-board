@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @Entity
 @NoArgsConstructor
@@ -24,6 +26,9 @@ public class Board extends Timestamp{
 
     @Column(nullable = false)
     private String password;
+
+    @OneToMany
+    private List<Comment> commentList;
 
 
 

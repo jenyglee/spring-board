@@ -16,9 +16,12 @@ public class User {
     private String username;
     @Column(nullable = false)
     private String password;
+    @Column(nullable = false)
+    private UserRoleEnum role;
 
-    public User(SignupRequestDto signupRequestDto) {
+    public User(SignupRequestDto signupRequestDto, UserRoleEnum role) {
         this.username = signupRequestDto.getUsername();
         this.password = signupRequestDto.getPassword();
+        this.role = role;
     }
 }

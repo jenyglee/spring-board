@@ -1,9 +1,12 @@
 package com.homework.homework01.dto;
 
 import com.homework.homework01.entity.Board;
+import com.homework.homework01.entity.Comment;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 public class BoardResponseDto {
@@ -12,6 +15,8 @@ public class BoardResponseDto {
     private String username;
     private String content;
     private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
+    private List<CommentResponseDto> commentList;
 
 
 
@@ -21,5 +26,16 @@ public class BoardResponseDto {
         this.content = board.getContent();
         this.username = board.getUsername();
         this.createdAt = board.getCreatedAt();
+        this.modifiedAt = board.getModifiedAt();
+        if(board.getCommentList() != null){
+            List<CommentResponseDto> commentList = new ArrayList<>();
+            for (Comment comment : board.getCommentList()){
+                commentList.add(new CommentResponseDto(comment));
+            }
+            this.commentList = commentList;
+        }else{
+            this.commentList = null;
+        }
+
     }
 }
