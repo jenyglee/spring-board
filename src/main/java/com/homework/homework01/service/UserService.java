@@ -30,7 +30,6 @@ public class UserService {
     public void signup(SignupRequestDto signupRequestDto) {
         //username 중복확인
         String username = signupRequestDto.getUsername();
-        System.out.println("username : " + username);
         Optional<User> user = userRepository.findByUsername(username);
         if(user.isPresent()){
             throw new IllegalArgumentException("중복된 사용자가 존재합니다.");

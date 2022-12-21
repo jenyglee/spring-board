@@ -1,10 +1,13 @@
 package com.homework.homework01.service;
 
+import com.homework.homework01.dto.BoardResponseDto;
 import com.homework.homework01.dto.CommentRequestDto;
 import com.homework.homework01.dto.CommentResponseDto;
+import com.homework.homework01.dto.DeleteRequestDto;
 import com.homework.homework01.entity.Board;
 import com.homework.homework01.entity.Comment;
 import com.homework.homework01.entity.User;
+import com.homework.homework01.entity.UserRoleEnum;
 import com.homework.homework01.jwtUtil.JwtUtil;
 import com.homework.homework01.repository.BoardRepository;
 import com.homework.homework01.repository.CommentRepository;
@@ -30,11 +33,11 @@ public class CommentService {
     @Transactional(readOnly = true)
     public List<CommentResponseDto> getComments(Long id) {
         Board board = boardRepository.findById(id).orElseThrow(
-                ()-> new IllegalArgumentException("게시글이 존재하지 않습니다.")
+                () -> new IllegalArgumentException("게시글이 존재하지 않습니다.")
         );
-        List<Comment> commentList =  board.getCommentList();
+        List<Comment> commentList = board.getCommentList();
         List<CommentResponseDto> list = new ArrayList<>();
-        for (Comment comment : commentList){
+        for (Comment comment : commentList) {
             list.add(new CommentResponseDto(comment));
         }
 
@@ -42,89 +45,57 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentResponseDto createComment(Long id, CommentRequestDto requestDto, HttpServletRequest request) {
-        // ✅토큰에서 유저정보를 빼내어 함께 저장해야함.
-        String token = jwtUtil.resolveToken(request);
-        Claims claims;
+    public CommentResponseDto createComment(Long id, CommentRequestDto requestDto, User user) {
+        // id를 이용해서 게시글을 단건 조회한다.
+        Board board = boardRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("게시글이 존재하지 않습니다.")
+        );
 
-        if(token != null){
-            if(jwtUtil.validateToken(token)){
-                claims = jwtUtil.getUserInfoFromToken(token);
-            }else{
-                throw new IllegalArgumentException("Token Error");
-            }
+        // 조회된 게시글의 commentList에 추가한다.
+        Comment comment = new Comment(board, requestDto, user);
+        List<Comment> commentList = board.getCommentList();
+        commentList.add(comment);
 
-            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
-                    ()-> new IllegalArgumentException("사용자가 존재하지 않습니다.")
-            );
-            // id를 이용해서 게시글을 단건 조회한다.
-            Board board = boardRepository.findById(id).orElseThrow(
-                    ()-> new IllegalArgumentException("게시글이 존재하지 않습니다.")
-            );
+        // commentList를 BoardRepository에 저장한다.
+        commentRepository.save(comment);
+        return new CommentResponseDto(comment);
 
-            // 조회된 게시글의 commentList에 추가한다.
-            Comment comment = new Comment(board, requestDto, user);
-            List<Comment> commentList = board.getCommentList();
-            commentList.add(comment);
 
-            // commentList를 BoardRepository에 저장한다.
-            commentRepository.save(comment);
+    }
+
+    @Transactional
+    public CommentResponseDto updateComment(Long boardId, Long commentId, CommentRequestDto requestDto, User user) {
+        Board board = boardRepository.findById(boardId).orElseThrow(
+                () -> new IllegalArgumentException("게시글이 존재하지 않습니다.")
+        );
+        Comment comment = commentRepository.findByIdAndBoard_Id(commentId, board.getId()).orElseThrow(
+                () -> new IllegalArgumentException("댓글이 존재하지 않습니다.")
+        );
+        // 관리자만 게시글 수정 가능
+        if (user.getRole() == UserRoleEnum.ADMIN) {
+            comment.update(requestDto);
             return new CommentResponseDto(comment);
-        }else{
-            return null;
+        } else {
+            throw new IllegalArgumentException("관리자만 게시글을 수정할 수 있습니다");
         }
 
     }
 
     @Transactional
-    public void updateComment(Long boardId, Long commentId, CommentRequestDto requestDto, HttpServletRequest request) {
-        String token = jwtUtil.resolveToken(request);
-        Claims claims;
-        if(token != null){
-            if(jwtUtil.validateToken(token)){
-                claims = jwtUtil.getUserInfoFromToken(token);
-            }else{
-                throw new IllegalArgumentException("Token Error");
-            }
+    public void deleteComment(Long boardId, Long commentId, User user) {
+        Board board = boardRepository.findById(boardId).orElseThrow(
+                () -> new IllegalArgumentException("게시글이 존재하지 않습니다.")
+        );
+        Comment comment = commentRepository.findByIdAndBoard_Id(commentId, board.getId()).orElseThrow(
+                () -> new IllegalArgumentException("댓글이 존재하지 않습니다.")
+        );
 
-            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
-                    ()-> new IllegalArgumentException("사용자가 존재하지 않습니다.")
-            );
-            Board board = boardRepository.findById(boardId).orElseThrow(
-                    ()-> new IllegalArgumentException("게시글이 존재하지 않습니다.")
-            );
-            Comment comment = commentRepository.findByIdAndBoard_IdAndUser_Id(commentId, board.getId(), user.getId()).orElseThrow(
-                    ()-> new IllegalArgumentException("댓글이 존재하지 않습니다.")
-            );
-            comment.validPassword(requestDto.getPassword());
-            comment.update(requestDto);
+        // 관리자만 댓글 삭제 가능
+        if (user.getRole() == UserRoleEnum.ADMIN) {
+            commentRepository.delete(comment);
+        } else {
+            throw new IllegalArgumentException("관리자만 게시글을 삭제할 수 있습니다");
         }
-    }
 
-    public void deleteComment(Long boardId, Long commentId, HttpServletRequest request) {
-        String token = jwtUtil.resolveToken(request);
-        Claims claims;
-        if(token != null){
-            if(jwtUtil.validateToken(token)){
-                claims = jwtUtil.getUserInfoFromToken(token);
-            }else{
-                throw new IllegalArgumentException("Token Error");
-            }
-
-            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
-                    ()-> new IllegalArgumentException("사용자가 존재하지 않습니다.")
-            );
-            Board board = boardRepository.findById(boardId).orElseThrow(
-                    ()-> new IllegalArgumentException("게시글이 존재하지 않습니다.")
-            );
-            commentRepository.deleteById(commentId);
-            // Optional<Comment> comment = commentRepository.findByIdAndBoard_IdAndUser_Id(commentId, board.getId(), user.getId());
-            // if (comment.isPresent()){
-            //     commentRepository.deleteById(commentId);
-            // }else{
-            //     throw new IllegalArgumentException("댓글이 존재하지 않습니다.");
-            // }
-
-        }
     }
 }

@@ -24,10 +24,7 @@ public class Board extends Timestamp{
     @Column(nullable = false)
     private String content;
 
-    @Column(nullable = false)
-    private String password;
-
-    @OneToMany
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> commentList;
 
 
@@ -35,20 +32,12 @@ public class Board extends Timestamp{
     public Board(BoardRequestDto requestDto, String username) {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
-        this.password = requestDto.getPassword();
         this.username = username;
     }
 
     public void update(BoardRequestDto requestDto){
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
-    }
-
-    public void validationPassword(String password){
-        if(!this.getPassword().equals(password)){
-            throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
-        }
-
     }
 
 }
