@@ -24,8 +24,8 @@ public class Board extends Timestamp{
     @Column(nullable = false)
     private String content;
 
-    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> commentList;
+    // @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+    // private List<Comment> commentList;
 
 
 

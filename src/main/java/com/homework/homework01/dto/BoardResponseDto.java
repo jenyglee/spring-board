@@ -16,26 +16,39 @@ public class BoardResponseDto {
     private String content;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
-    private List<CommentResponseDto> commentList;
+
+    private List<CommentResponseDto> commentList = new ArrayList<>();
 
 
 
-    public BoardResponseDto(Board board) {
+    public BoardResponseDto(Board board, List<Comment> comments) {
         this.id = board.getId();
         this.title = board.getTitle();
         this.content = board.getContent();
         this.username = board.getUsername();
         this.createdAt = board.getCreatedAt();
         this.modifiedAt = board.getModifiedAt();
-        if(board.getCommentList() != null){
-            List<CommentResponseDto> commentList = new ArrayList<>();
-            for (Comment comment : board.getCommentList()){
-                commentList.add(new CommentResponseDto(comment));
-            }
-            this.commentList = commentList;
-        }else{
-            this.commentList = null;
+        for (Comment comment:comments){
+            commentList.add(new CommentResponseDto(comment));
         }
+        // if(board.getCommentList() != null){
+        //     List<CommentResponseDto> commentList = new ArrayList<>();
+        //     for (Comment comment : board.getCommentList()){
+        //         commentList.add(new CommentResponseDto(comment));
+        //     }
+        //     this.commentList = commentList;
+        // }else{
+        //     this.commentList = null;
+        // }
 
+    }
+
+    public BoardResponseDto(Board board){
+        this.id = board.getId();
+        this.title = board.getTitle();
+        this.content = board.getContent();
+        this.username = board.getUsername();
+        this.createdAt = board.getCreatedAt();
+        this.modifiedAt = board.getModifiedAt();
     }
 }

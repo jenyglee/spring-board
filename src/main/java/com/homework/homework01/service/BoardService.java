@@ -2,10 +2,12 @@ package com.homework.homework01.service;
 
 import com.homework.homework01.dto.*;
 import com.homework.homework01.entity.Board;
+import com.homework.homework01.entity.Comment;
 import com.homework.homework01.entity.User;
 import com.homework.homework01.entity.UserRoleEnum;
 import com.homework.homework01.jwtUtil.JwtUtil;
 import com.homework.homework01.repository.BoardRepository;
+import com.homework.homework01.repository.CommentRepository;
 import com.homework.homework01.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,6 +21,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class BoardService {
     private final BoardRepository boardRepository;
+    private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     @Transactional(readOnly = true)
@@ -26,10 +29,11 @@ public class BoardService {
         List<BoardResponseDto> list = new ArrayList<>();
         List<Board> boards = boardRepository.findAllByOrderByCreatedAtDesc();
         for (Board board : boards){
-            list.add(new BoardResponseDto(board));
+            List<Comment> comments = commentRepository.findAllByBoardId(board.getId());
+            list.add(new BoardResponseDto(board, comments));
         }
-        return list;
 
+        return list;
     }
 
     public BoardResponseDto createBoard(BoardRequestDto requestDto, User user) {
@@ -48,7 +52,6 @@ public class BoardService {
         }else{
             throw new IllegalArgumentException("관리자만 게시글을 수정할 수 있습니다");
         }
-
     }
 
     public void deleteBoard(Long id,User user) {
@@ -68,7 +71,9 @@ public class BoardService {
         Board board = boardRepository.findById(id).orElseThrow(
                 ()-> new IllegalArgumentException("없는 게시물입니다.")
         );
+        List<Comment> comments = commentRepository.findAllByBoardId(id);
 
-        return new BoardResponseDto(board);
+
+        return new BoardResponseDto(board, comments);
     }
 }

@@ -30,47 +30,21 @@ public class CommentService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
 
-    @Transactional(readOnly = true)
-    public List<CommentResponseDto> getComments(Long id) {
-        Board board = boardRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("게시글이 존재하지 않습니다.")
-        );
-        List<Comment> commentList = board.getCommentList();
-        List<CommentResponseDto> list = new ArrayList<>();
-        for (Comment comment : commentList) {
-            list.add(new CommentResponseDto(comment));
-        }
 
-        return list;
-    }
 
     @Transactional
-    public CommentResponseDto createComment(Long id, CommentRequestDto requestDto, User user) {
-        // id를 이용해서 게시글을 단건 조회한다.
-        Board board = boardRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("게시글이 존재하지 않습니다.")
-        );
-
-        // 조회된 게시글의 commentList에 추가한다.
-        Comment comment = new Comment(board, requestDto, user);
-        List<Comment> commentList = board.getCommentList();
-        commentList.add(comment);
-
-        // commentList를 BoardRepository에 저장한다.
+    public CommentResponseDto createComment(Long boardId, CommentRequestDto requestDto, User user) {
+        Comment comment = new Comment(boardId, requestDto, user);
         commentRepository.save(comment);
         return new CommentResponseDto(comment);
-
-
     }
 
     @Transactional
     public CommentResponseDto updateComment(Long boardId, Long commentId, CommentRequestDto requestDto, User user) {
-        Board board = boardRepository.findById(boardId).orElseThrow(
-                () -> new IllegalArgumentException("게시글이 존재하지 않습니다.")
-        );
-        Comment comment = commentRepository.findByIdAndBoard_Id(commentId, board.getId()).orElseThrow(
+        Comment comment = commentRepository.findByIdAndBoardId(commentId, boardId).orElseThrow(
                 () -> new IllegalArgumentException("댓글이 존재하지 않습니다.")
         );
+
         // 관리자만 게시글 수정 가능
         if (user.getRole() == UserRoleEnum.ADMIN) {
             comment.update(requestDto);
@@ -78,18 +52,13 @@ public class CommentService {
         } else {
             throw new IllegalArgumentException("관리자만 게시글을 수정할 수 있습니다");
         }
-
     }
 
     @Transactional
     public void deleteComment(Long boardId, Long commentId, User user) {
-        Board board = boardRepository.findById(boardId).orElseThrow(
-                () -> new IllegalArgumentException("게시글이 존재하지 않습니다.")
-        );
-        Comment comment = commentRepository.findByIdAndBoard_Id(commentId, board.getId()).orElseThrow(
+        Comment comment = commentRepository.findByIdAndBoardId(commentId, boardId).orElseThrow(
                 () -> new IllegalArgumentException("댓글이 존재하지 않습니다.")
         );
-
         // 관리자만 댓글 삭제 가능
         if (user.getRole() == UserRoleEnum.ADMIN) {
             commentRepository.delete(comment);

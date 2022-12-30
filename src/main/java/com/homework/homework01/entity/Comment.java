@@ -17,14 +17,17 @@ public class Comment extends Timestamp {
     @JoinColumn(name = "USER_ID", nullable = false)
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "BOARD_ID", nullable = false)
-    private Board board;
+    // @ManyToOne
+    // @JoinColumn(name = "BOARD_ID", nullable = false)
+    // private Board board;
 
-    public Comment(Board board, CommentRequestDto requestDto, User user) {
+    private Long boardId;
+
+    public Comment(Long boardId, CommentRequestDto requestDto, User user) {
         this.content = requestDto.getContent();
-        this.board = board;
+        // this.board = board;
         this.user = user;
+        this.boardId = boardId;
     }
 
 
