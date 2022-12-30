@@ -23,9 +23,6 @@ public class UserService {
     private final JwtUtil jwtUtil;
     private static final String ADMIN_TOKEN = "AAABnvxRVklrnYxKZ0aHgTBcXukeZygoC";
 
-
-    //✨최소, 최대, 소문자+숫자 구성 제한하기
-    //✨성공했다는 메시지, 상태코드 반환하기
     @Transactional
     public void signup(SignupRequestDto signupRequestDto) {
         //username 중복확인
