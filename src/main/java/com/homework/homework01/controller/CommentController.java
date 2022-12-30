@@ -36,12 +36,11 @@ public class CommentController {
             User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
                     () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
             );
-            return commentService.createComment(id, requestDto, user);
+            return commentService.createComment(id, user.getUsername(), requestDto);
 
         } else {
             return null;
         }
-
     }
 
 
@@ -64,7 +63,6 @@ public class CommentController {
         } else {
             return null;
         }
-
     }
 
     // 댓글 삭제
@@ -84,6 +82,5 @@ public class CommentController {
             );
             commentService.deleteComment(boardId, commentId, user);
         }
-
     }
 }

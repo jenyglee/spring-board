@@ -26,15 +26,10 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CommentService {
     private final CommentRepository commentRepository;
-    private final BoardRepository boardRepository;
-    private final UserRepository userRepository;
-    private final JwtUtil jwtUtil;
-
-
 
     @Transactional
-    public CommentResponseDto createComment(Long boardId, CommentRequestDto requestDto, User user) {
-        Comment comment = new Comment(boardId, requestDto, user);
+    public CommentResponseDto createComment(Long boardId, String username, CommentRequestDto requestDto) {
+        Comment comment = new Comment(boardId, username, requestDto);
         commentRepository.save(comment);
         return new CommentResponseDto(comment);
     }

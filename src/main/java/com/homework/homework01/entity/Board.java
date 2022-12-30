@@ -27,8 +27,6 @@ public class Board extends Timestamp{
     // @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     // private List<Comment> commentList;
 
-
-
     public Board(BoardRequestDto requestDto, String username) {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();

@@ -13,9 +13,11 @@ public class Comment extends Timestamp {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String content;
-    @ManyToOne
-    @JoinColumn(name = "USER_ID", nullable = false)
-    private User user;
+    // @ManyToOne
+    // @JoinColumn(name = "USER_ID", nullable = false)
+    // private User user;
+
+    private String username;
 
     // @ManyToOne
     // @JoinColumn(name = "BOARD_ID", nullable = false)
@@ -23,11 +25,12 @@ public class Comment extends Timestamp {
 
     private Long boardId;
 
-    public Comment(Long boardId, CommentRequestDto requestDto, User user) {
+    public Comment(Long boardId, String username, CommentRequestDto requestDto) {
         this.content = requestDto.getContent();
         // this.board = board;
-        this.user = user;
+        // this.user = user;
         this.boardId = boardId;
+        this.username = username;
     }
 
 

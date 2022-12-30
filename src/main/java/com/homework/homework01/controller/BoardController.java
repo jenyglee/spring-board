@@ -93,8 +93,5 @@ public class BoardController {
             );
             boardService.deleteBoard(id, user);
         }
-
     }
-
-
 }
